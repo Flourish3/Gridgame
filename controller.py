@@ -1,38 +1,38 @@
-#import numpy as np
+import numpy as np
 
 class controller():
-	gridWidth = 5
-	gridHeight = 5
+	gridWidth = 0
+	gridHeight = 0
 	treasurePlaces = 5
 	damagedStates = 2
 	nbrActions = 4
 
 	initQmatrix = 0
 
-	totalStates = gridHeight*gridWidth*treasurePlaces*damagedStates
+	totalStates = 0
 	
 	Q = []
 	R = []
-	def __init__(self):
-		self.Q = [[self.initQmatrix]*self.totalStates,
+	def __init__(self,gridSize):
+		self.gridWidth = gridSize	
+		self.gridHeight = gridSize
+		self.totalStates = self.gridHeight*self.gridWidth*self.treasurePlaces*self.damagedStates
+		self.initQ()
+
+		print("Controller created")
+	
+
+	def initQ(self):
+		tmp = [0]*self.totalStates
+		x = 0
+		for i in range(0,self.gridWidth):
+			for j in range(0,self.gridHeight):
+				for k in range(0,self.treasurePlaces):
+					for l in range(0,self.damagedStates):
+						tmp[x] = (i,j,k,l)
+						x+=1
+		self.Q = [tmp,
 				  [self.initQmatrix]*self.totalStates,
 				  [self.initQmatrix]*self.totalStates,
-				  [self.initQmatrix]*self.totalStates]
-		initRewardMatrix(
-
-	def initRewardMatrix(self):
-		#Grid game
-		#__________________
-		#|P0||R ||  |  |P1|
-		#|  ||  | M |  |  |
-		#|  |   |   |  |M |
-		#|M | M |   |M |  |
-		#|P2|   |   |  |P3|
-		#P4 - no prize
-		#10 rewards for treasure
-		#Monsters appear anytime on M places
-		#Agent is damaged if it lands on monster
-		#-10 if it lands on montster when damaged
-		#Repaired when on R
-
-c = controller() 
+				  [self.initQmatrix]*self.totalStates,
+				  [self.initQmatrix]*self.totalStates] 

@@ -1,3 +1,4 @@
+import random as r
 class grid():
 	#Class that handles the grid/game
 	#Grid game
@@ -16,11 +17,17 @@ class grid():
 		#Actions: 0 left 1 up 2 down 3 right
 	R = []
 	grid = []
-	treasureState = 4
+	
 	gridSize = 0
 	moveState = 0
 	agentX = 0
 	agentY = 0
+	treasureState = 4
+	agentDamaged = 0
+	treasureChance = 0.5
+	monsterChance
+
+	monster = [0,0,0,0,0]
 
 	def __init__(self, size):
 		self.gridSize = size
@@ -53,6 +60,50 @@ class grid():
 		agentX = state[0]
 		agentY = state[1]
 		penelty = self.move(action)
+
+		points = 0
+		#check if agent is on treasure
+		if self.agentX == 0 & self.agentY == 0 & self.treasureState == 0:
+			points += 10
+			treasureState = 4
+		elif self.agentX == 0 & self.agentY == self.gridSize-1 & self.treasureState == 1:
+			points += 10
+			treasureState = 4
+		elif self.agentX == self.gridSize-1 & self.agentY == 0 & self.treasureState == 2:
+			po<nts += 10
+			treasureState = 4
+		elif self.agentX == self.gridSize-1 & self.agentY == self.gridSize-1 & self.treasureState == 3:
+			points += 10
+			treasureState = 4
+
+		#Repair the agent
+		if self.agentX == 0 & self.agentY == 1:
+			agentDamaged = 0
+
+		#Check monster
+		if (self.agentX == 3 & self.agentY == 0 & monster[0] == 1) |
+			(self.agentX == 3 & self.agentY == 1 & monster[1] == 1) |
+			(self.agentX == 1 & self.agentY == 2 & monster[2] == 1) |
+			(self.agentX == 3 & self.agentY == 3 & monster[3] == 1) |
+			(self.agentX == 2 & self.agentY == 4 & monster[4] == 1):
+			if agentDamaged == 1:
+				penalty += 10
+			agentDamaged = 1
+			
+		nextState = (agentX,agentY,treasureState,agentDamaged)
+		#Spawn monsters
+		if r.random > (1-monsterChance):
+			index = r.randint(0,4)
+			monsters[index] = !monsters[index] 
+
+		#Spawn treasure
+		if (self.treasureState != 4) & (r.random()> (1-self.treasureChance)):
+			#spawn new treasure
+			self.setTreasure(r.randint(0,3))
+
+
+		totalReward = points - penelty
+		return [totalReward,nextState]
 
 
 	def getGridSize(self):
@@ -89,7 +140,7 @@ class grid():
 			#On the top row, can't move, penalty
 			return 1
 		
-		self.agentY += 1
+		self.agentY -= 1
 		return 0
 	
 	def down(self): #2
@@ -97,7 +148,7 @@ class grid():
 			#On the top row, can't move, penalty
 			return 1
 		
-		self.agentY -= 1
+		self.agentY += 1
 		return 0
 	
 	def right(self): #3

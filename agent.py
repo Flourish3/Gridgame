@@ -1,8 +1,8 @@
 class agent():
-	xPos = 0
-	yPos = 0
+	xPos = 2
+	yPos = 2
 	damaged = 0
-	isTreasure = 0
+	treasure = 4
 
 	reward = 0
 	grid = 0
@@ -13,7 +13,15 @@ class agent():
 		print("Agent created")
 
 	def step(self):
-		print("Step")
+		#Check with controller to see where we should go
+		currentState = (self.xPos, self.yPos,self.treasure,self.damaged)
+		Qstate = self.controller.getQstate(currentState)
+		
+		action = self.getBestAction(Qstate)
+		nextState = self.grid.step(action,currentState)
 
 	def getReward(self):
 		return self.reward
+
+	def getBestAction(self,Qstate):
+		return 1

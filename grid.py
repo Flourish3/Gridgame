@@ -19,6 +19,8 @@ class grid():
 	treasureState = 4
 	gridSize = 0
 	moveState = 0
+	agentX = 0
+	agentY = 0
 
 	def __init__(self, size):
 		self.gridSize = size
@@ -46,18 +48,69 @@ class grid():
 
 		self.treasureState = t
 
+	def step(self,action,state):
+		#move the agent, then change the grid(treasure,monster)
+		agentX = state[0]
+		agentY = state[1]
+		penelty = self.move(action)
+
+
 	def getGridSize(self):
 		return self.gridSize
 
+	def move(self,action):
+		
+		if action == 0:
+			return self.left()
+		elif action == 1:
+			return self.up()
+		elif action == 2:
+			return self.down()
+		elif action == 3:
+			return self.right()
+
 	def left(self): #0
-		print("left")
+		if self.agentY == 0:
+			#On the left row, can't move, penalty
+			return 1
+		elif self.agentX == 0 & (self.agentY == 1 | self.agentY == 2):
+			#Standing to the right of wall, can't move into wall
+			return 1
+		elif self.agentX == 1 & self.agentY == 1:
+			#Standing to the right of wall, can't move into wall
+			return 1
+		else:
+			self.agentX -= 1
+			return 0
+		
 
 	def up(self): #1
-		print("up")
+		if self.agentX == 0:
+			#On the top row, can't move, penalty
+			return 1
+		
+		self.agentY += 1
+		return 0
 	
 	def down(self): #2
-		print("down")
+		if self.agentX == self.gridSize-1:
+			#On the top row, can't move, penalty
+			return 1
+		
+		self.agentY -= 1
+		return 0
 	
 	def right(self): #3
-		print("right")
+		if self.agentY == self.gridSize-1:
+			#On the right row, can't move, penalty
+			return 1
+		elif self.agentX == 0 & (self.agentY == 0 | self.agentY == 1):
+			#Standing to the left of wall, can't move into wall
+			return 1
+		elif self.agentX == 1 & self.agentY == 0:
+			#Standing to the left of wall, can't move into wall
+			return 1
+		else:
+			self.agentX += 1
+			return 0
 

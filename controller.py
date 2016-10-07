@@ -1,4 +1,4 @@
-import numpy as np
+#import numpy as np
 
 class controller():
 	gridWidth = 0
@@ -35,4 +35,8 @@ class controller():
 				  [self.initQmatrix]*self.totalStates,
 				  [self.initQmatrix]*self.totalStates,
 				  [self.initQmatrix]*self.totalStates,
-				  [self.initQmatrix]*self.totalStates] 
+				  [self.initQmatrix]*self.totalStates]
+
+	def getQstate(self,state):
+		index = self.Q[0].index(state)
+		return [self.Q[1][index],self.Q[2][index],self.Q[3][index],self.Q[4][index]]

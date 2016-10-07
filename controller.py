@@ -1,4 +1,4 @@
-#import numpy as np
+import random as r
 
 class controller():
 	gridWidth = 0
@@ -7,9 +7,14 @@ class controller():
 	damagedStates = 2
 	nbrActions = 4
 
-	initQmatrix = 0
+	greed = 0.2 #epsilon. greedy constant
+
+	initQmatrix = 5
 
 	totalStates = 0
+
+	discount = 0.9	#Gamma
+	stepSize = 0.2 	#Alpha
 	
 	Q = []
 	R = []
@@ -37,6 +42,24 @@ class controller():
 				  [self.initQmatrix]*self.totalStates,
 				  [self.initQmatrix]*self.totalStates]
 
-	def getQstate(self,state):
+	def getBestAction(self,state):
 		index = self.Q[0].index(state)
-		return [self.Q[1][index],self.Q[2][index],self.Q[3][index],self.Q[4][index]]
+		actions = [self.Q[1][index],self.Q[2][index],self.Q[3][index],self.Q[4][index]]
+		
+		if r.random() > (1-self.greed):
+			nextAction = actions.index(max(actions))
+		else:
+			nextAction = r.randint(0,3)
+		
+
+		#print(str(state) + " " + str(actions) + " " + str(nextAction))
+		return nextAction
+		
+	def updateQmatrix(self,currentState,action,reward,previousState,previousAction):
+		prevStateIndex = self.Q[0].index(previousState)
+		nextStateIndex = self.Q[0].index(currentState)
+
+		self.Q[previousAction+1][prevStateIndex] = (1-self.stepSize)*self.Q[action+1][prevStateIndex]+self.stepSize*(reward+self.discount*self.Q[action+1][nextStateIndex])
+
+	def setGreed(self,newGreed):
+		self.greed = newGreed

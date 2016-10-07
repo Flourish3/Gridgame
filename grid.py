@@ -20,24 +20,75 @@ class grid():
 	
 	gridSize = 0
 	moveState = 0
-	agentX = 0
-	agentY = 0
+	agentX = 2
+	agentY = 2
 	treasureState = 4
 	agentDamaged = 0
 	treasureChance = 0.5
-	monsterChance
+	monsterChance = 0.5
 
-	monster = [0,0,0,0,0]
+	totalStates = 250
+
+	monsters = [0,0,0,0,0]
 
 	def __init__(self, size):
+		self.accPoints = 0
+		self.accPen = 0
 		self.gridSize = size
 		self.initRewardMatrix()
 		self.initGrid()
 		print("Grid created")
 
 	def initRewardMatrix(self):
-		
-		R =[0]
+		tmp = [0]*self.totalStates
+		x = 0
+		for i in range(0,self.gridSize):
+			for j in range(0,self.gridSize):
+				for k in range(0,5):
+					for l in range(0,2):
+						tmp[x] = (i,j,k,l)
+						x+=1
+		self.R = [tmp,
+				  [0]*self.totalStates,
+				  [0]*self.totalStates,
+				  [0]*self.totalStates,
+				  [0]*self.totalStates]
+		#Add -1 for all edges
+		#Top row, x = 0, -1 for up
+		for i in [i for i,x in enumerate(self.R[0]) if x[0] == 0]:
+			self.R[2][i] = -1
+		#bottom row, -1 for down
+		for i in [i for i,x in enumerate(self.R[0]) if x[0] == self.gridSize-1]:
+			self.R[3][i] = -1
+		#left row
+		for i in [i for i,x in enumerate(self.R[0]) if x[1] == 0]:
+			self.R[1][i] = -1
+		#right row
+		for i in [i for i,x in enumerate(self.R[0]) if x[1] == self.gridSize-1]:
+			self.R[4][i] = -1
+
+		#Add -1 for the walls
+		#Moving right into walls
+		#wall to the right of p1
+		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 0 and x[1] == 0 )]:
+			self.R[4][i] = -1
+		#second wall by p1
+		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 1 and x[1] == 0) ]:
+			self.R[4][i] = -1
+		#Right wall
+		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 0 and x[1] == 1) ]:
+			self.R[4][i] = -1
+
+		#Moving left
+		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 0 and x[1] == 1 )]:
+			self.R[1][i] = -1
+		#second wall by p1
+		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 1 and x[1] == 1) ]:
+			self.R[1][i] = -1
+		#Right wall
+		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 0 and x[1] == 2) ]:
+			self.R[1][i] = -1
+
 
 	def initGrid(self):
 		for i in range(0,self.gridSize):
@@ -52,7 +103,6 @@ class grid():
 			self.grid[self.gridSize-1][0] = 1
 		elif t == 3:
 			self.grid[self.gridSize-1][self.gridSize-1] = 1
-
 		self.treasureState = t
 
 	def step(self,action,state):
@@ -63,46 +113,47 @@ class grid():
 
 		points = 0
 		#check if agent is on treasure
-		if self.agentX == 0 & self.agentY == 0 & self.treasureState == 0:
+		if self.agentX == 0 and self.agentY == 0 and self.treasureState == 0:
 			points += 10
-			treasureState = 4
-		elif self.agentX == 0 & self.agentY == self.gridSize-1 & self.treasureState == 1:
+			self.accPoints += 10
+			self.treasureState = 4
+		elif self.agentX == 0 and self.agentY == self.gridSize-1 and self.treasureState == 1:
 			points += 10
-			treasureState = 4
-		elif self.agentX == self.gridSize-1 & self.agentY == 0 & self.treasureState == 2:
-			po<nts += 10
-			treasureState = 4
-		elif self.agentX == self.gridSize-1 & self.agentY == self.gridSize-1 & self.treasureState == 3:
+			self.accPoints += 10
+			self.treasureState = 4
+		elif self.agentX == self.gridSize-1 and self.agentY == 0 and  self.treasureState == 2:
 			points += 10
-			treasureState = 4
+			self.accPoints += 10
+			self.treasureState = 4
+		elif self.agentX == self.gridSize-1 and  self.agentY == self.gridSize-1 and  self.treasureState == 3:
+			points += 10
+			self.accPoints += 10
+			self.treasureState = 4
 
 		#Repair the agent
-		if self.agentX == 0 & self.agentY == 1:
-			agentDamaged = 0
+		if self.agentX == 0 and  self.agentY == 1:
+			self.agentDamaged = 0
 
 		#Check monster
-		if (self.agentX == 3 & self.agentY == 0 & monster[0] == 1) |
-			(self.agentX == 3 & self.agentY == 1 & monster[1] == 1) |
-			(self.agentX == 1 & self.agentY == 2 & monster[2] == 1) |
-			(self.agentX == 3 & self.agentY == 3 & monster[3] == 1) |
-			(self.agentX == 2 & self.agentY == 4 & monster[4] == 1):
-			if agentDamaged == 1:
-				penalty += 10
-			agentDamaged = 1
+		if ((self.agentX == 3) and (self.agentY == 0) and  (self.monsters[0] == 1)) or (self.agentX == 3 and  self.agentY == 1 and  self.monsters[1] == 1) or (self.agentX == 1 and  self.agentY == 2 and  self.monsters[2] == 1) or (self.agentX == 3 and  self.agentY == 3 and  self.monsters[3] == 1) or	(self.agentX == 2 and  self.agentY == 4 and  self.monsters[4] == 1):
+			if self.agentDamaged == 1:
+				penelty += 10
+			self.agentDamaged = 1
 			
-		nextState = (agentX,agentY,treasureState,agentDamaged)
+		nextState = (self.agentX,self.agentY,self.treasureState,self.agentDamaged)
 		#Spawn monsters
-		if r.random > (1-monsterChance):
+		if (r.random() > (1-self.monsterChance)):
 			index = r.randint(0,4)
-			monsters[index] = !monsters[index] 
+			self.monsters[index] = not(self.monsters[index])
 
 		#Spawn treasure
-		if (self.treasureState != 4) & (r.random()> (1-self.treasureChance)):
+		if (self.treasureState == 4) and (r.random()> (1-self.treasureChance)):
 			#spawn new treasure
 			self.setTreasure(r.randint(0,3))
 
-
+		self.accPen += penelty
 		totalReward = points - penelty
+		print(totalReward)
 		return [totalReward,nextState]
 
 
@@ -124,14 +175,14 @@ class grid():
 		if self.agentY == 0:
 			#On the left row, can't move, penalty
 			return 1
-		elif self.agentX == 0 & (self.agentY == 1 | self.agentY == 2):
+		elif self.agentX == 0 and  (self.agentY == 1 or self.agentY == 2):
 			#Standing to the right of wall, can't move into wall
 			return 1
-		elif self.agentX == 1 & self.agentY == 1:
+		elif self.agentX == 1 and  self.agentY == 1:
 			#Standing to the right of wall, can't move into wall
 			return 1
 		else:
-			self.agentX -= 1
+			self.agentY -= 1
 			return 0
 		
 
@@ -139,29 +190,29 @@ class grid():
 		if self.agentX == 0:
 			#On the top row, can't move, penalty
 			return 1
-		
-		self.agentY -= 1
-		return 0
+		else:
+			self.agentX -= 1
+			return 0
 	
 	def down(self): #2
 		if self.agentX == self.gridSize-1:
 			#On the top row, can't move, penalty
 			return 1
 		
-		self.agentY += 1
+		self.agentX += 1
 		return 0
 	
 	def right(self): #3
 		if self.agentY == self.gridSize-1:
 			#On the right row, can't move, penalty
 			return 1
-		elif self.agentX == 0 & (self.agentY == 0 | self.agentY == 1):
+		elif self.agentX == 0 and  (self.agentY == 0 or self.agentY == 1):
 			#Standing to the left of wall, can't move into wall
 			return 1
-		elif self.agentX == 1 & self.agentY == 0:
+		elif self.agentX == 1 and  self.agentY == 0:
 			#Standing to the left of wall, can't move into wall
 			return 1
 		else:
-			self.agentX += 1
+			self.agentY += 1
 			return 0
 

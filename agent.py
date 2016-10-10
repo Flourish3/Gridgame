@@ -9,7 +9,6 @@ class agent():
 	controller = 0
 
 	previousState = 0
-	previousAction = 0
 
 	def __init__(self,grid,controller):
 		self.previousState = (self.xPos,self.yPos,self.treasure,self.damaged)
@@ -32,11 +31,10 @@ class agent():
 		#print(str(self.previousState) + " " + str(action))
 		
 		#Update Q-matrix		
-		self.controller.updateQmatrix(currentState,action,rewardFromAction,self.previousState,self.previousAction)
+		self.controller.updateQmatrix(currentState,action,rewardFromAction,self.previousState)
 
 		#Update previous states
 		self.previousState = currentState
-		self.previousAction = action
 
 	def getReward(self):
 		return self.reward

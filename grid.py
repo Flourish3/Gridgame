@@ -15,11 +15,8 @@ class grid():
 		#-10 if it lands on montster when damaged
 		#Repaired when on R
 		#Actions: 0 left 1 up 2 down 3 right
-	R = []
-	grid = []
 	
 	gridSize = 0
-	moveState = 0
 	agentX = 2
 	agentY = 2
 	treasureState = 4
@@ -29,81 +26,11 @@ class grid():
 
 	totalStates = 250
 
-	monsters = [0,0,0,0,0]
+	monsters = [r.random()<monsterChance,r.random()<monsterChance,r.random()<monsterChance,r.random()<monsterChance,r.random()<monsterChance]
 
 	def __init__(self, size):
-		self.accPoints = 0
-		self.accPen = 0
 		self.gridSize = size
-		self.initRewardMatrix()
-		self.initGrid()
 		print("Grid created")
-
-	def initRewardMatrix(self):
-		tmp = [0]*self.totalStates
-		x = 0
-		for i in range(0,self.gridSize):
-			for j in range(0,self.gridSize):
-				for k in range(0,5):
-					for l in range(0,2):
-						tmp[x] = (i,j,k,l)
-						x+=1
-		self.R = [tmp,
-				  [0]*self.totalStates,
-				  [0]*self.totalStates,
-				  [0]*self.totalStates,
-				  [0]*self.totalStates]
-		#Add -1 for all edges
-		#Top row, x = 0, -1 for up
-		for i in [i for i,x in enumerate(self.R[0]) if x[0] == 0]:
-			self.R[2][i] = -1
-		#bottom row, -1 for down
-		for i in [i for i,x in enumerate(self.R[0]) if x[0] == self.gridSize-1]:
-			self.R[3][i] = -1
-		#left row
-		for i in [i for i,x in enumerate(self.R[0]) if x[1] == 0]:
-			self.R[1][i] = -1
-		#right row
-		for i in [i for i,x in enumerate(self.R[0]) if x[1] == self.gridSize-1]:
-			self.R[4][i] = -1
-
-		#Add -1 for the walls
-		#Moving right into walls
-		#wall to the right of p1
-		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 0 and x[1] == 0 )]:
-			self.R[4][i] = -1
-		#second wall by p1
-		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 1 and x[1] == 0) ]:
-			self.R[4][i] = -1
-		#Right wall
-		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 0 and x[1] == 1) ]:
-			self.R[4][i] = -1
-
-		#Moving left
-		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 0 and x[1] == 1 )]:
-			self.R[1][i] = -1
-		#second wall by p1
-		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 1 and x[1] == 1) ]:
-			self.R[1][i] = -1
-		#Right wall
-		for i in [i for i,x in enumerate(self.R[0]) if (x[0] == 0 and x[1] == 2) ]:
-			self.R[1][i] = -1
-
-
-	def initGrid(self):
-		for i in range(0,self.gridSize):
-			self.grid.append([0]*self.gridSize)
-
-	def setTreasure(self,t):
-		if t == 0:
-			self.grid[0][0] = 1
-		elif t == 1:
-			self.grid[0][self.gridSize-1] = 1
-		elif t == 2:
-			self.grid[self.gridSize-1][0] = 1
-		elif t == 3:
-			self.grid[self.gridSize-1][self.gridSize-1] = 1
-		self.treasureState = t
 
 	def step(self,action,state):
 		#move the agent, then change the grid(treasure,monster)
@@ -115,19 +42,15 @@ class grid():
 		#check if agent is on treasure
 		if self.agentX == 0 and self.agentY == 0 and self.treasureState == 0:
 			points += 10
-			self.accPoints += 10
 			self.treasureState = 4
 		elif self.agentX == 0 and self.agentY == self.gridSize-1 and self.treasureState == 1:
 			points += 10
-			self.accPoints += 10
 			self.treasureState = 4
 		elif self.agentX == self.gridSize-1 and self.agentY == 0 and  self.treasureState == 2:
 			points += 10
-			self.accPoints += 10
 			self.treasureState = 4
 		elif self.agentX == self.gridSize-1 and  self.agentY == self.gridSize-1 and  self.treasureState == 3:
 			points += 10
-			self.accPoints += 10
 			self.treasureState = 4
 
 		#Repair the agent
@@ -142,18 +65,15 @@ class grid():
 			
 		nextState = (self.agentX,self.agentY,self.treasureState,self.agentDamaged)
 		#Spawn monsters
-		if (r.random() > (1-self.monsterChance)):
-			index = r.randint(0,4)
-			self.monsters[index] = not(self.monsters[index])
-
+		monsters = [r.random()<self.monsterChance,r.random()<self.monsterChance,r.random()<self.monsterChance,r.random()<self.monsterChance,r.random()<self.monsterChance]
+		
 		#Spawn treasure
-		if (self.treasureState == 4) and (r.random()> (1-self.treasureChance)):
+		if (self.treasureState == 4) and (r.random() < self.treasureChance):
 			#spawn new treasure
-			self.setTreasure(r.randint(0,3))
+			self.treasureState = r.randint(0,3)
 
-		self.accPen += penelty
 		totalReward = points - penelty
-		print(totalReward)
+		#print(totalReward)
 		return [totalReward,nextState]
 
 
@@ -170,6 +90,8 @@ class grid():
 			return self.down()
 		elif action == 3:
 			return self.right()
+		else:
+			print("WTF?")
 
 	def left(self): #0
 		if self.agentY == 0:
@@ -198,9 +120,9 @@ class grid():
 		if self.agentX == self.gridSize-1:
 			#On the top row, can't move, penalty
 			return 1
-		
-		self.agentX += 1
-		return 0
+		else:
+			self.agentX += 1
+			return 0
 	
 	def right(self): #3
 		if self.agentY == self.gridSize-1:

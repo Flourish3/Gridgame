@@ -9,15 +9,17 @@ class controller():
 
 	greed = 0.2 #epsilon. greedy constant
 
-	initQmatrix = 5
+	initQmatrix = 10
 
 	totalStates = 0
 
 	discount = 0.9	#Gamma
-	stepSize = 0.2 	#Alpha
+	stepSize = 0.8 	#Alpha
+
+	alphaFixed = False
 	
 	Q = []
-	R = []
+	visits = []
 	def __init__(self,gridSize):
 		self.gridWidth = gridSize	
 		self.gridHeight = gridSize
@@ -41,13 +43,24 @@ class controller():
 				  [self.initQmatrix]*self.totalStates,
 				  [self.initQmatrix]*self.totalStates,
 				  [self.initQmatrix]*self.totalStates]
+		self.visits = [[0]*self.totalStates,
+				  [0]*self.totalStates,
+				  [0]*self.totalStates,
+				  [0]*self.totalStates]
+
 
 	def getBestAction(self,state):
-		index = self.Q[0].index(state)
-		actions = [self.Q[1][index],self.Q[2][index],self.Q[3][index],self.Q[4][index]]
 		
-		if r.random() > (1-self.greed):
-			nextAction = actions.index(max(actions))
+		if r.random() < self.greed:
+			index = self.Q[0].index(state)
+			nextAction = 1
+			bestVal = self.Q[nextAction][index]
+			for i in range(2,5):
+				if self.Q[i][index] > bestVal:
+					bestVal = self.Q[i][index]
+					nextAction = i
+			nextAction -= 1
+			
 		else:
 			nextAction = r.randint(0,3)
 		
@@ -55,11 +68,22 @@ class controller():
 		#print(str(state) + " " + str(actions) + " " + str(nextAction))
 		return nextAction
 		
-	def updateQmatrix(self,currentState,action,reward,previousState,previousAction):
+	def updateQmatrix(self,currentState,action,reward,previousState):
 		prevStateIndex = self.Q[0].index(previousState)
 		nextStateIndex = self.Q[0].index(currentState)
+		newDatum = reward+self.discount*self.getMaxValue(currentState)
 
-		self.Q[previousAction+1][prevStateIndex] = (1-self.stepSize)*self.Q[action+1][prevStateIndex]+self.stepSize*(reward+self.discount*self.Q[action+1][nextStateIndex])
+		self.visits[action][prevStateIndex] += 1
+		if not self.alphaFixed:
+			self.stepSize = 1.0/self.visits[action][prevStateIndex]
+		tmp = (1-self.stepSize)*self.Q[action+1][prevStateIndex]+self.stepSize*newDatum
+		self.Q[action+1][prevStateIndex] = tmp
 
 	def setGreed(self,newGreed):
 		self.greed = newGreed
+
+	def getMaxValue(self,state):
+		index = self.Q[0].index(state)
+		actions = [self.Q[1][index],self.Q[2][index],self.Q[3][index],self.Q[4][index]]
+		tmp = actions[actions.index(max(actions))]
+		return tmp

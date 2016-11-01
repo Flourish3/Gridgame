@@ -3,15 +3,15 @@ Using Q-learning for an agent to learn it's way through a grid with monsters, tr
 
 Grid game
 __________________
-|P0||R ||  |  |P1|
+|P0||R||__|__|P1|
 
-|  ||  | M |  |  |
+|__||__| M |__|__|
 
-|  |   |   |  |M |
+|__|__|__|__|M |
 
-|M | M |   |M |  |
+|M | M |__|M |__|
 
-|P2|   |   |  |P3|
+|P2|__|__|__|P3|
 
 P4 - no prize
 

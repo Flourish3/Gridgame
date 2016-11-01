@@ -2,16 +2,8 @@
 Using Q-learning for an agent to learn it's way through a grid with monsters, treasures and healing points
 
 Grid game
-__________________
-|P0||R||__|__|P1|
-
-|__||__| M |__|__|
-
-|__|__|__|__|M |
-
-|M | M |__|M |__|
-
-|P2|__|__|__|P3|
+___________________
+|P0 || R ||--|--|P1|
 
 P4 - no prize
 

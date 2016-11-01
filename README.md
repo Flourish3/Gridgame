@@ -4,6 +4,7 @@ Using Q-learning for an agent to learn it's way through a grid with monsters, tr
 Grid game
 ___________________
 |P0 || R ||--|--|P1|
+
 |---||-- | M |--|--|
 P4 - no prize
 
